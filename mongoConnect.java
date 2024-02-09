@@ -16,8 +16,8 @@ import com.mongodb.client.MongoDatabase;
 
 class mongoConnect {
 	
-	private static String DB_URI ; //The URI for connecting to the MongoDB database
-	private static String DB_NAME; //The name of the MongoDB database
+    private static String DB_URI ; //The URI for connecting to the MongoDB database
+    private static String DB_NAME; //The name of the MongoDB database
 
     private MongoClient client; //The MongoClient object for connecting to the MongoDB server
     private MongoDatabase db; //The MongoDatabase object representing the connected database
@@ -78,8 +78,8 @@ class mongoConnect {
     	     db.createCollection(collectionName);
     	     return db.getCollection(collectionName);
     	} catch (MongoWriteException e) {
-    		GUI.showErrorScreen(2);
-    		return null;
+    	     GUI.showErrorScreen(2);
+    	     return null;
     	}
     }
     
