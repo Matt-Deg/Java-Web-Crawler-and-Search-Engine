@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class GUI {
 
-	//The UserInteractions object for interacting with the user interface (search engine)
+    //The UserInteractions object for interacting with the user interface (search engine)
     private UserInteractions uInterface;
     
     //The JFrame for the waiting screen
@@ -30,13 +30,13 @@ public class GUI {
      */
     public GUI(UserInteractions userI) {
     	uInterface = userI;
-		WelcomeFrame();
-	}
+	WelcomeFrame();
+    }
 
     /**
      * Initializes the welcome screen GUI components.
      */
-	private void WelcomeFrame() {
+     private void WelcomeFrame() {
         JFrame welcomeFrame = new JFrame("Welcome to Search Engine");
         welcomeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -47,7 +47,7 @@ public class GUI {
         int frameHeight = 300;
         welcomeFrame.setBounds((screenWidth - frameWidth) / 2, (screenHeight - frameHeight) / 2, frameWidth, frameHeight);
 
-     // Textboxes for database link and name
+        // Textboxes for database link and name
         JTextField databaseLinkField = new JTextField();
         JTextField databaseNameField = new JTextField();
         
@@ -59,17 +59,18 @@ public class GUI {
         JButton startButton = new JButton("Start Search");
         startButton.addActionListener(new ActionListener() {
 
-        	/**
+            /**
              * Invoked when the start button is clicked
              * Initiates either crawling or searching based on user selection
              * @param e The ActionEvent object: "Start Search" JButton
              */
             public void actionPerformed(ActionEvent e) {
             	if(crawlerCheckBox.isSelected()) {
-            		uInterface.crawlSelected(databaseLinkField.getText(), databaseNameField.getText());
+            	    uInterface.crawlSelected(databaseLinkField.getText(), databaseNameField.getText());
             	} else {
-            		uInterface.callBrowser(databaseLinkField.getText(), databaseNameField.getText());
+            	    uInterface.callBrowser(databaseLinkField.getText(), databaseNameField.getText());
             	}
+		    
             	welcomeFrame.dispose();
             }
         });
@@ -110,7 +111,7 @@ public class GUI {
         welcomeFrame.setVisible(true);
     }
 
-	/**
+    /**
      * Displays a waiting screen indicating that crawling is in progress
      */
     void showWaitingScreen() {
@@ -121,13 +122,13 @@ public class GUI {
           waitingFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
           waitingFrame.addWindowListener(new WindowAdapter() {
         	
-        	  /**
+              /**
                * Invoked when the waiting screen window is closed. Calls the unexpectedTermination()
                * method of the UserInteractions interface
                * @param e The WindowEvent object: Exit Screen Button
                */
         	  public void windowClosed(WindowEvent e) {
-        		  uInterface.unexpectedTermination();
+        	      uInterface.unexpectedTermination();
         	  }
           });
 
@@ -139,12 +140,13 @@ public class GUI {
     	});
       }
 
+	
     /**
      * Closes the waiting screen.
      */
     public void closeWaitingScreen() {
         if (waitingFrame != null) {
-        	SwingUtilities.invokeLater(() -> waitingFrame.dispose());
+            SwingUtilities.invokeLater(() -> waitingFrame.dispose());
         }
     }
     
@@ -211,10 +213,10 @@ public class GUI {
 
         frame.setVisible(true);
     }
-    
+
+	
     /*
-     * GUI Error Message that can be called by various parts of the code when an error makes the program
-     * unrecoverable
+     * GUI Error Message that can be called by various parts of the code when an error makes the program unrecoverable
      * @param status Integer informing what error message should be printed out
      */
     public static void showErrorScreen(int status) {
@@ -224,7 +226,7 @@ public class GUI {
     	 switch(status) {
     	 
     	 case 0:
-    		 errorMessage = "There was an error connecting to the MongoDB database.\n" +
+    		errorMessage = "There was an error connecting to the MongoDB database.\n" +
                      "Please make sure your database is configured properly\n" +
                      "and that your URI and database name are correct.";
     		 break;
