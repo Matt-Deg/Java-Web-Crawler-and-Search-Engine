@@ -21,15 +21,15 @@ import com.mongodb.client.model.Filters;
 
 class BrowserAlgorithm {
 	
-	// MongoDB collections for crawled documents and the inverted index
-	MongoCollection<Document> crawledDocs;
-	MongoCollection<Document> invertedIndex;
+     // MongoDB collections for crawled documents and the inverted index
+     MongoCollection<Document> crawledDocs;
+     MongoCollection<Document> invertedIndex;
 	
-	private long indexSize; // number of terms in the inverted index
-	private mongoConnect mongo; //a mongoConnect class to operate on a MongoDB database
+     private long indexSize; // number of terms in the inverted index
+     private mongoConnect mongo; //a mongoConnect class to operate on a MongoDB database
 	
 	
-	/**
+     /**
      * Constructor for BrowserAlgorithm class
      * Gets the crawled documents collection and the inverted index collection from the MongoDB database
      * @param crawlCollect the name of the collection storing crawled documents
@@ -37,18 +37,18 @@ class BrowserAlgorithm {
      * @param DB_URI the URI for connecting to the MongoDB database
      * @param DB_NAME the name of the MongoDB database
      */
-    public BrowserAlgorithm(String crawlCollect, String indexCollect, String DB_URI, String DB_NAME) {
+     public BrowserAlgorithm(String crawlCollect, String indexCollect, String DB_URI, String DB_NAME) {
  
     	try {
-    		mongo = new mongoConnect(DB_URI, DB_NAME);
-        	MongoDatabase browserDB = mongo.getDB();
-        	crawledDocs = browserDB.getCollection(crawlCollect);
+    	    mongo = new mongoConnect(DB_URI, DB_NAME);
+            MongoDatabase browserDB = mongo.getDB();
+            crawledDocs = browserDB.getCollection(crawlCollect);
             invertedIndex = browserDB.getCollection(indexCollect);
             indexSize = invertedIndex.countDocuments();
     	} catch (MongoException e){
-    		GUI.showErrorScreen(1);
+    	    GUI.showErrorScreen(1);
     	} catch (NullPointerException e) {
-    		GUI.showErrorScreen(1);
+    	    GUI.showErrorScreen(1);
     	}
     }
     
@@ -72,20 +72,25 @@ class BrowserAlgorithm {
    
     	// Remove keys not present in the inverted index
     	try {
-    		ArrayList<String> distinctValues = invertedIndex.distinct("Term", String.class).into(new ArrayList<>());
+    	    ArrayList<String> distinctValues = invertedIndex.distinct("Term", String.class).into(new ArrayList<>());
             queryWords.keySet().retainAll(distinctValues);
     	} catch (MongoException e) {
-    		GUI.showErrorScreen(1);
+    	    GUI.showErrorScreen(1);
     	}
 
         Set<String> queryToPass = queryWords.keySet();
 
        //algorithm calls
         HashMap<String, Double> searchIDF = calcSearchIDF(queryToPass);
+	    
         HashMap<String, Double[]> docWeights = docTF_IDF(queryWords, searchIDF);
+	    
         double queryVectorLength = queryVector(queryWords, searchIDF);
+	    
         HashMap<String, Double> cosines = cosineSimilarities(docWeights, queryVectorLength);
+	    
         ArrayList<String> top25 = pageSort(cosines);
+	    
         LinkedHashMap<String, String> urls = getURLs(top25);
     	
         return urls;
@@ -103,10 +108,10 @@ class BrowserAlgorithm {
         for (String term : queryWords) {
         	Document cd = invertedIndex.find(Filters.eq("Term", term)).first(); //inverted index document for a specific query term
         	if(cd != null) {
-        		org.bson.Document docInfoTuple = (Document) cd.get("Index"); //returns the index value of the document
-            	int numDocs = docInfoTuple.size(); //gets the number of documents where the term is present
-                double idf = Math.log10(indexSize / numDocs); //calculates idf
-                searchIDF.put(term, idf);
+        	   org.bson.Document docInfoTuple = (Document) cd.get("Index"); //returns the index value of the document
+            	   int numDocs = docInfoTuple.size(); //gets the number of documents where the term is present
+                   double idf = Math.log10(indexSize / numDocs); //calculates idf
+                   searchIDF.put(term, idf);
         	}
         }
 
@@ -128,10 +133,12 @@ class BrowserAlgorithm {
         
         //for every term in the query
         for (Map.Entry<String, Double> term : queryWords.entrySet()) {
+	
             String termKey = term.getKey(); //the term
             double queryTermTFIDF = term.getValue() * searchIDF.getOrDefault(termKey, 0.0); //the TFIDF for the current query term
             
             Document termDoc = invertedIndex.find(Filters.eq("Term", termKey)).first(); //gets the inverted index doc for the current query term
+	
             if (termDoc != null) {
                 Document wordDocs = termDoc.get("Index", Document.class); //gets the nested document in the index for the term
 
@@ -140,6 +147,7 @@ class BrowserAlgorithm {
                     String docId = crawledDoc.getKey();
                     double wordFreq = ((Number) crawledDoc.getValue()).doubleValue();
                     Document cd = crawledDocs.find(Filters.eq("ID", docId)).first();
+			
                     if (cd != null) {
                         double maxFreq = cd.getDouble("MaxFrequency");
                         double tf = wordFreq / maxFreq;
@@ -161,12 +169,12 @@ class BrowserAlgorithm {
      * @param searchIDF a map of query terms and their IDF values
      * @return a double representing the length of the query vector
      */
-   private double queryVector (HashMap<String, Double> queryWords, HashMap<String, Double> searchIDF) {
+    private double queryVector (HashMap<String, Double> queryWords, HashMap<String, Double> searchIDF) {
     	
     	double queryVectorLen = 0; //overall sum of vector length
     	
     	for(Map.Entry<String, Double> term : queryWords.entrySet()) {
-    		String termKey = term.getKey(); //the current term
+    	    String termKey = term.getKey(); //the current term
             double length = (term.getValue() * searchIDF.getOrDefault(termKey, 0.0)); //add the term's TFIDF to the vector length
             queryVectorLen += length * length; //add squared length to vector length
     	}
@@ -191,22 +199,21 @@ class BrowserAlgorithm {
     	//calculate its cosine similarity
     	for (Map.Entry<String, Double[]> doc : weights.entrySet()) {
     		
-        	String doc_id = doc.getKey();
+            String doc_id = doc.getKey();
         	
-        	Double[] calcs = weights.get(doc_id);
+            Double[] calcs = weights.get(doc_id);
         	
-        	double docSumsSqrt = Math.sqrt(calcs[1]); //Euclidean distance of document
-        	double denominator = docSumsSqrt * queryEuclidean; //calculate denominator by multiplying euclidean distances
+            double docSumsSqrt = Math.sqrt(calcs[1]); //Euclidean distance of document
+            double denominator = docSumsSqrt * queryEuclidean; //calculate denominator by multiplying euclidean distances
         	
-        	if(denominator != 0) {
-        		double cosSim = calcs[0] / denominator;
+            if(denominator != 0) {
+        	double cosSim = calcs[0] / denominator;
 
             	cosines.put(doc_id, cosSim);
-        	}
+            }
         }
     	
     	return cosines;
-    	
     }
     
     /**
